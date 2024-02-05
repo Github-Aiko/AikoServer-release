@@ -85,10 +85,10 @@ install_base() {
 
 # 0: running, 1: not running, 2: not installed
 check_status() {
-    if [[ ! -f /etc/systemd/system/XrayR.service ]]; then
+    if [[ ! -f /etc/systemd/system/Aiko-Server.service ]]; then
         return 2
     fi
-    temp=$(systemctl status XrayR | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+    temp=$(systemctl status Aiko-Server | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
     if [[ x"${temp}" == x"running" ]]; then
         return 0
     else
@@ -100,24 +100,24 @@ install_acme() {
     curl https://get.acme.sh | sh
 }
 
-install_XrayR() {
-    if [[ -e /usr/local/XrayR/ ]]; then
-        rm /usr/local/XrayR/ -rf
+install_Aiko-Server() {
+    if [[ -e /usr/local/Aiko-Server/ ]]; then
+        rm /usr/local/Aiko-Server/ -rf
     fi
 
-    mkdir /usr/local/XrayR/ -p
-	cd /usr/local/XrayR/
+    mkdir /usr/local/Aiko-Server/ -p
+	cd /usr/local/Aiko-Server/
 
     if  [ $# == 0 ] ;then
-        last_version=$(curl -Ls "https://api.github.com/repos/XrayR-project/XrayR/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        last_version=$(curl -Ls "https://api.github.com/repos/AikoPanel/AikoServer/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
-            echo -e "${red}检测 XrayR 版本失败，可能是超出 Github API 限制，请稍后再试，或手动指定 XrayR 版本安装${plain}"
+            echo -e "${red}检测 Aiko-Server 版本失败，可能是超出 Github API 限制，请稍后再试，或手动指定 Aiko-Server 版本安装${plain}"
             exit 1
         fi
-        echo -e "检测到 XrayR 最新版本：${last_version}，开始安装"
-        wget -q -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip
+        echo -e "检测到 Aiko-Server 最新版本：${last_version}，开始安装"
+        wget -q -N --no-check-certificate -O /usr/local/Aiko-Server/Aiko-Server-linux.zip https://github.com/AikoPanel/AikoServer/releases/download/${last_version}/Aiko-Server-linux-${arch}.zip
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}下载 XrayR 失败，请确保你的服务器能够下载 Github 的文件${plain}"
+            echo -e "${red}下载 Aiko-Server 失败，请确保你的服务器能够下载 Github 的文件${plain}"
             exit 1
         fi
     else
@@ -126,88 +126,88 @@ install_XrayR() {
 	else
 	    last_version="v"$1
 	fi
-        url="https://github.com/XrayR-project/XrayR/releases/download/${last_version}/XrayR-linux-${arch}.zip"
-        echo -e "开始安装 XrayR ${last_version}"
-        wget -q -N --no-check-certificate -O /usr/local/XrayR/XrayR-linux.zip ${url}
+        url="https://github.com/AikoPanel/AikoServer/releases/download/${last_version}/Aiko-Server-linux-${arch}.zip"
+        echo -e "开始安装 Aiko-Server ${last_version}"
+        wget -q -N --no-check-certificate -O /usr/local/Aiko-Server/Aiko-Server-linux.zip ${url}
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}下载 XrayR ${last_version} 失败，请确保此版本存在${plain}"
+            echo -e "${red}下载 Aiko-Server ${last_version} 失败，请确保此版本存在${plain}"
             exit 1
         fi
     fi
 
-    unzip XrayR-linux.zip
-    rm XrayR-linux.zip -f
-    chmod +x XrayR
-    mkdir /etc/XrayR/ -p
-    rm /etc/systemd/system/XrayR.service -f
-    file="https://github.com/XrayR-project/XrayR-release/raw/master/XrayR.service"
-    wget -q -N --no-check-certificate -O /etc/systemd/system/XrayR.service ${file}
-    #cp -f XrayR.service /etc/systemd/system/
+    unzip Aiko-Server-linux.zip
+    rm Aiko-Server-linux.zip -f
+    chmod +x Aiko-Server
+    mkdir /etc/Aiko-Server/ -p
+    rm /etc/systemd/system/Aiko-Server.service -f
+    file="https://github.com/Github-Aiko/Aiko-Server-release/raw/master/Aiko-Server.service"
+    wget -q -N --no-check-certificate -O /etc/systemd/system/Aiko-Server.service ${file}
+    #cp -f Aiko-Server.service /etc/systemd/system/
     systemctl daemon-reload
-    systemctl stop XrayR
-    systemctl enable XrayR
-    echo -e "${green}XrayR ${last_version}${plain} 安装完成，已设置开机自启"
-    cp geoip.dat /etc/XrayR/
-    cp geosite.dat /etc/XrayR/ 
+    systemctl stop Aiko-Server
+    systemctl enable Aiko-Server
+    echo -e "${green}Aiko-Server ${last_version}${plain} 安装完成，已设置开机自启"
+    cp geoip.dat /etc/Aiko-Server/
+    cp geosite.dat /etc/Aiko-Server/ 
 
-    if [[ ! -f /etc/XrayR/config.yml ]]; then
-        cp config.yml /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/config.yml ]]; then
+        cp config.yml /etc/Aiko-Server/
         echo -e ""
-        echo -e "全新安装，请先参看教程：https://github.com/XrayR-project/XrayR，配置必要的内容"
+        echo -e "全新安装，请先参看教程：https://github.com/Github-Aiko/Aiko-Server，配置必要的内容"
     else
-        systemctl start XrayR
+        systemctl start Aiko-Server
         sleep 2
         check_status
         echo -e ""
         if [[ $? == 0 ]]; then
-            echo -e "${green}XrayR 重启成功${plain}"
+            echo -e "${green}Aiko-Server 重启成功${plain}"
         else
-            echo -e "${red}XrayR 可能启动失败，请稍后使用 XrayR log 查看日志信息，若无法启动，则可能更改了配置格式，请前往 wiki 查看：https://github.com/XrayR-project/XrayR/wiki${plain}"
+            echo -e "${red}Aiko-Server 可能启动失败，请稍后使用 Aiko-Server log 查看日志信息，若无法启动，则可能更改了配置格式，请前往 wiki 查看：https://github.com/AikoPanel/Aiko-Server/wiki${plain}"
         fi
     fi
 
-    if [[ ! -f /etc/XrayR/dns.json ]]; then
-        cp dns.json /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/dns.json ]]; then
+        cp dns.json /etc/Aiko-Server/
     fi
-    if [[ ! -f /etc/XrayR/route.json ]]; then
-        cp route.json /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/route.json ]]; then
+        cp route.json /etc/Aiko-Server/
     fi
-    if [[ ! -f /etc/XrayR/custom_outbound.json ]]; then
-        cp custom_outbound.json /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/custom_outbound.json ]]; then
+        cp custom_outbound.json /etc/Aiko-Server/
     fi
-    if [[ ! -f /etc/XrayR/custom_inbound.json ]]; then
-        cp custom_inbound.json /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/custom_inbound.json ]]; then
+        cp custom_inbound.json /etc/Aiko-Server/
     fi
-    if [[ ! -f /etc/XrayR/rulelist ]]; then
-        cp rulelist /etc/XrayR/
+    if [[ ! -f /etc/Aiko-Server/rulelist ]]; then
+        cp rulelist /etc/Aiko-Server/
     fi
-    curl -o /usr/bin/XrayR -Ls https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/XrayR.sh
-    chmod +x /usr/bin/XrayR
-    ln -s /usr/bin/XrayR /usr/bin/xrayr # 小写兼容
-    chmod +x /usr/bin/xrayr
+    curl -o /usr/bin/Aiko-Server -Ls https://raw.githubusercontent.com/AikoPanel/AikoServer/master/Aiko-Server.sh
+    chmod +x /usr/bin/Aiko-Server
+    ln -s /usr/bin/Aiko-Server /usr/bin/Aiko-Server # 小写兼容
+    chmod +x /usr/bin/Aiko-Server
     cd $cur_dir
     rm -f install.sh
     echo -e ""
-    echo "XrayR 管理脚本使用方法 (兼容使用xrayr执行，大小写不敏感): "
+    echo "Aiko-Server 管理脚本使用方法 (兼容使用Aiko-Server执行，大小写不敏感): "
     echo "------------------------------------------"
-    echo "XrayR                    - 显示管理菜单 (功能更多)"
-    echo "XrayR start              - 启动 XrayR"
-    echo "XrayR stop               - 停止 XrayR"
-    echo "XrayR restart            - 重启 XrayR"
-    echo "XrayR status             - 查看 XrayR 状态"
-    echo "XrayR enable             - 设置 XrayR 开机自启"
-    echo "XrayR disable            - 取消 XrayR 开机自启"
-    echo "XrayR log                - 查看 XrayR 日志"
-    echo "XrayR update             - 更新 XrayR"
-    echo "XrayR update x.x.x       - 更新 XrayR 指定版本"
-    echo "XrayR config             - 显示配置文件内容"
-    echo "XrayR install            - 安装 XrayR"
-    echo "XrayR uninstall          - 卸载 XrayR"
-    echo "XrayR version            - 查看 XrayR 版本"
+    echo "Aiko-Server                    - 显示管理菜单 (功能更多)"
+    echo "Aiko-Server start              - 启动 Aiko-Server"
+    echo "Aiko-Server stop               - 停止 Aiko-Server"
+    echo "Aiko-Server restart            - 重启 Aiko-Server"
+    echo "Aiko-Server status             - 查看 Aiko-Server 状态"
+    echo "Aiko-Server enable             - 设置 Aiko-Server 开机自启"
+    echo "Aiko-Server disable            - 取消 Aiko-Server 开机自启"
+    echo "Aiko-Server log                - 查看 Aiko-Server 日志"
+    echo "Aiko-Server update             - 更新 Aiko-Server"
+    echo "Aiko-Server update x.x.x       - 更新 Aiko-Server 指定版本"
+    echo "Aiko-Server config             - 显示配置文件内容"
+    echo "Aiko-Server install            - 安装 Aiko-Server"
+    echo "Aiko-Server uninstall          - 卸载 Aiko-Server"
+    echo "Aiko-Server version            - 查看 Aiko-Server 版本"
     echo "------------------------------------------"
 }
 
 echo -e "${green}开始安装${plain}"
 install_base
 # install_acme
-install_XrayR $1
+install_Aiko-Server $1
